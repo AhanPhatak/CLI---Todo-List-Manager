@@ -179,6 +179,84 @@ The `CMakeLists.txt` automatically detects MySQL on macOS via Homebrew. For othe
 cmake .. -DMYSQL_PREFIX=/opt/mysql
 ```
 
+## Docker Deployment
+
+### Quick Start with Docker Compose
+
+The easiest way to run the Todo CLI with MySQL in Docker:
+
+```bash
+# Start MySQL database
+docker-compose up -d mysql
+
+# Run todo commands (MySQL runs in background)
+docker-compose run --rm todo_app list
+docker-compose run --rm todo_app add "My task"
+docker-compose run --rm todo_app done 1
+docker-compose run --rm todo_app remove 1
+
+# Stop services
+docker-compose down
+```
+
+### Build Docker Image Manually
+
+```bash
+# Build the image
+docker build -t todo-cli:latest .
+
+# Run with external MySQL (replace with your MySQL host/credentials)
+docker run -e TODO_DB_HOST=host.docker.internal \
+           -e TODO_DB_USER=root \
+           -e TODO_DB_PASS=password \
+           todo-cli:latest list
+```
+
+### Docker Compose Services
+
+**mysql** — MySQL 8.0 database
+- Host: `mysql` (or `localhost` from host machine)
+- Port: `3306` (exposed to host)
+- Database: `todo_cli_db`
+- User: `todo_user` / Password: `todo_password`
+- Data persisted in `mysql_data` volume
+
+**todo_app** — Todo CLI application
+- Built from the project Dockerfile
+- Automatically waits for MySQL to be healthy
+- All environment variables pre-configured
+- Runs on-demand with `docker-compose run`
+
+### Volume Persistence
+
+MySQL data is stored in the `mysql_data` Docker volume, so data persists between `docker-compose up/down` cycles:
+
+```bash
+# View volumes
+docker volume ls
+
+# Inspect the todo data volume
+docker volume inspect cli---todo-list-manager_mysql_data
+
+# Delete volume (WARNING: deletes data)
+docker volume rm cli---todo-list-manager_mysql_data
+```
+
+### Custom Configuration
+
+Edit `docker-compose.yml` to change:
+- MySQL credentials
+- Database name
+- Port mappings
+- Environment variables
+
+```yaml
+environment:
+  MYSQL_USER: custom_user
+  MYSQL_PASSWORD: custom_pass
+  MYSQL_DATABASE: custom_db
+```
+
 ## Troubleshooting
 
 ### MySQL Connection Error

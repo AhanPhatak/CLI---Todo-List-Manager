@@ -37,10 +37,8 @@ services:
       TODO_DB_PORT: 3306
     networks:
       - todo_network
-    stdin_open: true
-    tty: true
-    entrypoint: /bin/bash
-    command: -c "echo 'Todo CLI ready. Run: docker-compose exec todo_app /app/todo <command>' && /bin/bash"
+    profiles:
+      - donotstart
 
 volumes:
   mysql_data:
