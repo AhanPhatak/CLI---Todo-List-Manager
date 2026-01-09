@@ -233,14 +233,11 @@ User input is escaped using `mysql_real_escape_string()` to prevent SQL injectio
 
 ## Future Enhancements
 
-- [ ] Prepared statements for better security
 - [ ] Configuration file support (`.toml` / `.ini`)
-- [ ] Unit tests and integration tests
 - [ ] Docker support for MySQL
 - [ ] SQLite as lightweight alternative backend
 - [ ] Additional fields: priority, due date, categories
 - [ ] Bulk operations and filtering
-- [ ] Unicode support improvements
 
 ## License
 
