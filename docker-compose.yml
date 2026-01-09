@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  mysql:
+    image: mysql:8.0
+    container_name: todo_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: todo_cli_db
+      MYSQL_USER: todo_user
+      MYSQL_PASSWORD: todo_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/create_db.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - todo_network
+
+  # Todo CLI Application Service
+  todo_app:
+    build: .
+    container_name: todo_cli_app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      TODO_DB_HOST: mysql
+      TODO_DB_USER: todo_user
+      TODO_DB_PASS: todo_password
+      TODO_DB_NAME: todo_cli_db
+      TODO_DB_PORT: 3306
+    networks:
+      - todo_network
+    stdin_open: true
+    tty: true
+    entrypoint: /bin/bash
+    command: -c "echo 'Todo CLI ready. Run: docker-compose exec todo_app /app/todo <command>' && /bin/bash"
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  todo_network:
+    driver: bridge
