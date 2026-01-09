@@ -111,6 +111,18 @@ int cmd_remove(MYSQL* conn, const std::string& id) {
         std::cerr << "No task with id=" << id << '\n';
         return 2;
     }
+    
+    // Renumber remaining tasks sequentially starting from 1
+    if (mysql_query(conn, "SET @num := 0")) {
+        std::cerr << "Warning: Renumbering failed: " << mysql_error(conn) << '\n';
+    }
+    if (mysql_query(conn, "UPDATE todos SET id = (@num := @num + 1) ORDER BY created_at ASC")) {
+        std::cerr << "Warning: Renumbering failed: " << mysql_error(conn) << '\n';
+    }
+    if (mysql_query(conn, "ALTER TABLE todos AUTO_INCREMENT = 1")) {
+        std::cerr << "Warning: Renumbering failed: " << mysql_error(conn) << '\n';
+    }
+    
     std::cout << "Removed: " << id << '\n';
     return 0;
 }
